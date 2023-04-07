@@ -1,0 +1,42 @@
+Objective: test normalizeURL()		
+
+b) write test file			
+	Crawl.test.js			//Jest will automatically look for files with .test.js		//naming convention important
+	
+	const {normalizeURL} = require('./crawl.js')		//import normalizeURL() from crawl.js //using destructuring
+	const {test,jest} = require('@jest/globals')		//import test() and jest object
+
+	//string description  //actual teset
+	test('normalizeURL', ()=> {
+		const input    = 'blablabla'				//input string		
+		const actual   = normalizeURL(input)		//normalizeURL() over input string			
+		const expected = 'something meaningful'		//
+
+		expect(actual).toEqual(expected)			//should not match	
+	})
+
+
+	>npm test
+
+
+Test Suites: 1 failed, 1 total
+
+Tests: 1 failed, 1 total
+Snapshots: 0 total
+Time: 0.194 s, estimated 1 5
+MW_—
+wagslane@MacBook—Pro—4 webcrawlerhttp %
+
+//try changing input to something meaningful
+
+> webcrawlerhttp@1.0.0 test
+> jest
+m ./crawl.test.js
+/ normalizeURL (1 ms)
+Test Suites: 1 passed, 1 total
+Tests: 1 passed, 1 total
+Snapshots: 0 total
+Time: 0.206 s, estimated 1 s
+Ran all test suites.
+Iwagslane@MacBook-Pro—4 webcrawlerhttp % I
+

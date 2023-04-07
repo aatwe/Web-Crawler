@@ -1,0 +1,112 @@
+Objective: Convert nasty dump of JS objects ----> report
+
+a) Report.js
+
+function printReport(pages) {
+	console.log("====")
+	console.log("REPOR")
+	console.log("====")
+	const sortedPages = sortPages(pages)
+	for(const sortedPage of sortedPages) {
+		const url = sortedPage[0]
+		const hits = sortedPage[1]
+		console.log('Found ${hits} links to page ${url}')
+	console.log("====")
+	console.log("END")
+	console.log("====")
+	}
+
+ }
+
+
+function sortPages(pages) {
+	pagesArr = Object.entries(pages)			//Convert this into array
+	pagesArr.sort(a,b) => {				//a,b represent 2 individual entries in array
+		aHits = a[1]
+		bHits = b[1]
+		return b[1] - a[1]
+	})
+	return pagesArr
+}
+
+module.exports = {
+	sortPages
+	printReport
+}
+
+b) Report.test.js
+
+const { sortPages } = require('./report.js')
+dbnst { test, expect } = require('@jest/globals')
+
+test('sortPages strip protocol', () => {
+	const input = {			//What is input? a pages object
+	   'https://wagslane.dev/path':1,
+	   ' https://wagslane.dev': 3		//url ----> maps to ----> how many times url shows up as a link on website
+	   'https://wagslane.dev/path2: 3,
+	   'https://wagslane.dev/path3: 3,
+	   'https://wagslane.dev/path4: 3		//sorting 5 pages
+	}
+
+
+const actual = sortPages(input)
+
+const expected =  [
+			['https://wagslane.dev/path4' , 9],				//
+			['https://wagslane.dev' , 3]	
+			['https://wagslane.dev' , 3]
+			['https://wagslane.dev' , 3]
+			['https://wagslane.dev/path' , 1]
+]
+expect(actual).toEqual(expected)
+})
+
+
+
+//sort pages working
+
+
+
+
+
+c) main.js
+
+
+const {crawlPage} = require('./crawl.js')
+function main() {
+	if(process.argv.length < 3) {			//why3?
+		console.log("no website provided")
+		process.exit(1)				//dont forget to exit process 
+	}
+
+	if(process.argv.length > 3) {			//why3?		//explained in header
+		console.log("too many command line arguments")
+		process.exit(1)				//dont forget to exit process 
+	}
+
+	const baseURL = process.argv[2]
+
+	//for (const arg of process.argv) {
+	//	console.log(arg)
+	//}
+
+	console.log("starting crawl of ${baseURL}")
+	const pages = await crawlPage(baseURL, baseURL, {})
+	printReport(pages)
+}
+
+main() 
+
+
+>
+npm run start
+
+
+git add .
+
+git commit —m "printReport finished"
+:letions(-)
+
+git branch
+
+git push origin main

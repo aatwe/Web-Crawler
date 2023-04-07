@@ -1,0 +1,989 @@
+1: 
+crawl a website, scrape a website
+
+  a.1) More project applications?
+	Price comparison website 	: collect info about products + prices
+	Job search aggregators   	: find list of job openings
+	social media analytics tools  : collect user engagement,sentiment analysis
+	web archiving			: crawl website, preserve historical record
+	content aggregation		: news aggregator
+
+
+b) 
+Problem scenario:  sometimes different webpages all lead to same page
+
+c) How our app solves?
+produces a report
+	report tells about what is the internal linking structure of that website
+	i.e
+	which page ----> links to which page
+//Used by web marketers, SEO search engine optimization experts
+
+
+c.1) What report will contain?
+	which pages link to which pages
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+2: Project setup: Create and clone a empty repo, Install nvm
+
+b) a) Create a repo on github
+	you know
+
+b) clone the repo
+	you know
+
+c) intall node nvm
+
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash		//script to install latest version of nvm
+
+d) Add .nvmrc file --> to root of our repo
+
+	.nvmrc
+		18.7.0			//This is the version of node we will use
+						//(Node version manager : run commands file : configures settings for nvm)
+						//What is this file? shells scipt --> runs each time terminal opens
+						//What use? specify what version of node to use
+
+e) nvm install
+
+	>nvm install			//downloads node		
+	>nvm use			//switch current version
+
+f) cross check
+	>node --version
+
+//node is installed
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+a) create main.js
+	console.log('hello world')
+
+
+	>CLI
+	>node main.js	//starts node interpreter --> passes main.js as entry point
+	>hello world		//conclusion: can run js files from Command line (Run javascript server side using Node)			
+					//normally we run JS in browser
+//However we use npm : since we will install testSuit and packages
+//need a manager
+
+
+	a.1) what features Node provides?
+		Environment:
+			server side instead of browser
+		a.1.1)APIs
+			
+				1) File System APIs : read and manipulate files on file system
+
+				const fs = require('fs');
+
+					fs.readFile('/path/to/file', 'utf8', (err, data) => {
+					  if (err) throw err;
+					 	 console.log(data);
+					});
+
+			
+				2) HTTP API : Create HTTP server
+				
+				import
+				http.createServer()
+				set properties of res object
+						statusCode,header,
+				send response (close connection)
+				listen(port,,callback)			//after server starts listening ->callback runs : informes that server is running
+			
+const http = require('http');					//import http module
+
+const server = http.createServer((req, res) => {	//creates new server instance
+										//returns a callback function when request received by server
+  res.statusCode = 200;							//callback function takes 2 parameters: 'req' and 'res'	//what are these parameters for?
+										//if request successful ==> set res to 200
+  res.setHeader('Content-Type', 'text/plain');			// set 'Content-type' header in response : to text/plain 	//response will be plain text			
+  res.end('Hello, world!\n');						//send string 'Hello world' HTTP response to client ==> ends response process	//closes connection with client
+});										
+
+server.listen(3000, () => {						//starts the server --> makes server ready to accept incoming  HTTP requests
+  console.log('Server running at http://localhost:3000/');		//inside .listen(callbackfunction()) --> is the callback function
+});												//when request received this function is returned .
+
+			Q) What difference between returning a function and calling?
+				calling --> executes function
+				returning -->creates new function instance--> can be executed later
+			Ex
+			function createGreeting(name) {
+			  return function() {
+			    console.log(`Hello, ${name}!`);
+  			};
+			}
+
+			const greetJohn = createGreeting('John');
+			const greetJane = createGreeting('Jane');
+
+			greetJohn(); // Output: "Hello, John!"
+			greetJane(); // Output: "Hello, Jane!"
+
+
+
+
+
+			//Note: HTTP is built on top of TCP
+				HTTP: How handle requests : servers use HTTP methods: GET,POST,PUT,DELETE
+						After incoming request received, handling includes:
+							1) Parsing request headers
+							2) Reading request body data		
+							3) Routing request to apt handler function
+							4) Sending response back to client
+						
+
+					How communicate 	  : HTTP messages
+						What data exchanged bw client and server over HTTP protocol?
+							1) HTTP request message (Client --> Server)
+							2) HTTP response message (Server --> Client)
+							3) Data in request body
+							4) Data in response body
+		
+
+				TCP : How handle requests and communicate? TCP protocol		
+
+			3) NETWORKING API : create and manage network connections. (Create TCP server using .net module)
+		
+
+			const net = require('net');					//import 'net' module
+
+			const server = net.createServer(socket => {		//create new TCP server instance
+			  socket.end('Hello, world!\n');					//pass a socket object as argument //socket represents connection bw server and client
+			});										//call .end() of socket object		//sends end event to client with message 'Hello, world'
+		
+			server.listen(3000, () => {						//.listen(port, callback)	//callback called after server starts to listen
+			  console.log('Server running at http://localhost:3000/');	
+			});
+
+
+
+
+			4) CHILD PROCESS API : Create and manage child process
+			Scenario: simple 'ls' command in terminal works
+			What if we programmed in a javascript file to run xyz commands?
+			i.e we can allow Node.js to interact --->  system shell ---> Automation!
+
+
+
+			Problem statement: run ls command and capture their output? exec() from child_process module
+
+			const { exec } = require('child_process');		//import
+		
+			exec('ls', (err, stdout, stderr) => {			//call 'exec(ls, callback())' function with 'ls' command as argument
+			  if (err) {								// callback() is called when 'ls' finished executing
+			    console.error(`exec error: ${err}`);				//if error occured --> log message to console
+			    return;
+			  }
+			  console.log(`stdout: ${stdout}`);					//if no error --> log output of 'ls' command to console.log() 
+			  console.error(`stderr: ${stderr}`);
+			});
+
+
+
+		Modules:
+				What are modules? reusable block of code
+
+		//Define the module
+			module --> can be loaded into other modules (require())		
+	
+			//greetings.js	//name of file will be module name
+									// define a function in module
+			function sayHello(name) {
+			  return `Hello, ${name}!`;
+			}
+
+			//app.js
+									//export function be used			
+			module.exports = {
+			  sayHello,
+			};
+
+		//Use the module
+			// load the "greetings" module
+			const greetings = require('./greetings');
+	
+			// use the "sayHello" function from the "greetings" module
+			console.log(greetings.sayHello('John')); // Output: "Hello, John!"
+
+
+
+
+		Console:
+			What is console: interact with terminal
+
+			// Logging to the console
+			console.log('Hello, world!');
+
+			// Logging an error message
+			console.error('Oops, something went wrong!');
+		
+			// Logging a warning message
+			console.warn('Please be careful!');
+
+			// Using console.time() and console.timeEnd() to measure the time it takes to execute a piece of code
+			console.time('myFunction');
+			myFunction();
+			console.timeEnd('myFunction');
+
+						
+
+		Language features
+			
+1)		Asynchrnonous Programming: basically delay of 2 seconds --> before returning data n	
+
+		Basically setTimeout() is asynchronous
+		rest of code 	     is synchronous
+
+setTimeout() will execute after 2 seconds
+Rest of code can execute during 2 seconds while
+
+function fetchData(callback) {					//
+  setTimeout(() => {							//simulate asynchronous operation(setTimeout()), call callback(data) after delay of 2 sec
+    const data = { name: "John", age: 30 };				//create object 
+    callback(data);								//pass object to callback
+  }, 2000);							
+}
+
+fetchData(data => {						//invoking fetchData()	//What is asynchronous about it? fetchData(callback)
+  console.log(data);										//fetchData finishes asynchronous operation(retrieve data) --> callback() executes after 
+});
+
+								//why dont see callback() definition? fetchData() ---> callback passed as argument	//ARROW FUNCTION
+ 
+								fetchData(callback) = fetchData(data => { console.log(data); }) //represents callback function definition  
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Asynchronous methods:
+
+	setInterval
+	XMLHttpRequest
+	fetch
+	setTimeout
+	setImmediate
+	process.nextTick	
+	callback functions in Node : File System callbacks, Network callbacks, Timer callbacks, Database callbacks, Event handling callbacks	/generally: I/O or network requests involving --> asynchronous
+
+Synchronous vs synchronous function
+	synchronous:  execute immediately within same thread  of calling function
+	asynchronous: execute after some time/ some event occured. calling function not blocked
+	
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Ex with both asynchronous and synchronous code
+
+// synchronous function						//Define a sync function
+function syncFunction(value, callback) {				//pass value and callback() as argument
+  const result = value + 1;							// value++	
+  callback(result);							//call callback(with value++)
+}
+
+// asynchronous function
+function asyncFunction(value, callback) {			//Define a async function
+  setTimeout(() => {							//use setTimeout()
+    const result = value + 1;							//value++
+    callback(result);							//call callback with value++
+  }, 2000);								//wait for 2 seconds
+}
+
+// synchronous code
+console.log("Before sync function call");
+syncFunction(10, result => {					//call syncFunction()  --> inside arrow function//callback()  //console.log("Sync function result: " + result);
+  console.log("Sync function result: " + result);
+});
+console.log("After sync function call");
+
+// asynchronous code
+console.log("Before async function call");
+asyncFunction(10, result => {					//asyncFunction()      -->
+  console.log("Async function result: " + result);
+});
+console.log("After async function call");
+
+-----------------------------------------
+
+>Output:
+Before sync function call
+Sync function result: 11
+After sync function call
+Before async function call
+After async function call		//2 second delay
+Async function result: 11
+_______________________________________________________________________________________________________________________
+b)  Install npm
+	npm init -> press enter
+
+ b.1) npm start:
+		runs our script
+		additional checks (check security vulnerabilities in packages, check if dependency updated since last time installed package)+ tasks
+		//keeps application running until manually stop(Ctr + C)  //node main.js stops application after script executed
+//What specifiying node main.js in scripts does?
+	1) no need to node main.js in CLI
+	> instead can just use
+	>npm start			//and script will run
+
+	2) Also dependencies will be available to our code when we pull them in package.json
+	
+	3) we use npm to run tests
+
+
+	//a package.json file will be created
+	{
+	"name": "webcrawlerhttp",
+	"version": "1.0.0",
+	"description": "Project for the Learn HTTP course",
+	"main": "main.js",
+	D Debug
+	"scripts": {
+	"start": "node main.js",						//HERE WE HAVE SPECIFIED node main.js		//this will run when we do npm start
+	I "test": "echo \"Error: no test specified\" && exit 1"
+	}.
+	"repository": {
+	"type": "git",
+	"url": "git+https://github.com/wagslane/webcrawlerhttp.git"
+
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+c) Install Jest dependency		//Jest = test suite//We will do test driven development for project
+
+  npm install --save-dev jest
+
+
+	//new dependency will be added to package.json
+
+	"devDependencies": {
+	"jest": "^29.3.1"
+	}
+		
+
+		2 folders created
+			//node_modules folder		//Code for all Jest dependencies is stored here
+			//package-lock.json file		//tracks dependencies
+		
+			//package-lock.json keeps track of all dependencies in our project 	//autogenerated
+			
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+d)Add node_modules to gitignore file
+		//we dont want node_modules dependencies in our github repo
+		//only want application specific code
+	
+.gitignore
+	
+
+	//note: we will add package.json to github, just not the folder node_modules
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+e) install all dependencies listed in package.json?
+	npm install
+//----all dependencies are added----//
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+f) Try running jest  test suite
+	f.1) 
+	npm test
+
+		//why this error?	//there are no scripts provided
+		in package.json
+		"scripts": {
+
+		"start": "node main.js",
+		"test": "echo \"Error: no test specified\"-&&-exit-1"
+		.}"| I
+	
+	f.2) Add jest
+	
+		in package.json
+		"scripts": {
+
+		"start": "node main.js",
+		"test": "jest"
+		.}"| I
+
+	f.3) run again
+
+		npm test
+
+
+	>Output:
+	no tests found exiting with code 1			//Jest is working and installed
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+g) Commit this code to git
+
+git add .									//add to staging area
+git commit -m "added jest dep, created main.js file"		//commit code
+git push origin								//push code
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+h) Some URLs end with '/ '
+Some dont
+
+Objective: write a test too check if https://blog.boot.dev/path/ is stripped down to  'blog.boot.dev/path'
+			how? expect() 		function --> provided by Jest
+			     normalizeURL()	function --> provuded by Jest	
+h.1) //Concept:  use expect + assertion methods to test your code //check if code behaves correctly under different scenarios
+	//in case of fail test --> Jest provides a  detialed error message	//can identify problem
+		 
+		In jest
+		exepct() --> write assertions	
+		expect(actual).toBe(expected);
+
+		//Assertion methods:
+			toBe()		checks if actual is exactly = expected
+			toEqual()		checks if actual is recursively = expected
+			toBeTruthy()	checks if value != false,undefined,null,0,NaN,empty string
+			toContain()		checks if 'actual' contains 'expected'
+
+
+
+
+//Test the normalizeURL()
+//crawl.test.js
+
+	//Concept:
+		URL object in Javascript: constructor (Uniform Resource Locator)		
+		//what can we do with it?
+			1) parse URLs
+				pass in constructor: new URL(urlString [, base])
+
+				const urlString = 'https://www.example.com/path/to/resource?query=string#fragment';
+				const url = new URL(urlString);
+
+				console.log(url.protocol);    // "https:"
+				console.log(url.hostname);    // "www.example.com"
+				console.log(url.pathname);    // "/path/to/resource"
+				console.log(url.search);      // "?query=string"
+				console.log(url.hash);        // "#fragment"
+
+
+			2) manipulate URLs
+				const urlString = 'https://www.example.com/path/to/resource?query=string#fragment';
+				const url = new URL(urlString);
+
+				// Change the protocol to "http"
+				url.protocol = 'http:';
+
+				// Add a new query parameter
+				url.searchParams.set('newparam', 'newvalue');
+
+				// Remove an existing query parameter
+				url.searchParams.delete('query');
+
+				// Get the updated URL string
+				const newUrlString = url.toString();
+				console.log(newUrlString);
+				// Output: "http://www.example.com/path/to/resource?newparam=newvalue#fragment"
+				
+
+
+		//Concept:
+		How modules work
+
+// myModule.js				//Define module
+const myFunction = () => {
+  console.log("Hello, world!");
+}
+
+module.exports = {			//export module
+  myFunction					//these parts will be accessible from other parts
+}
+
+
+//main.js
+
+// main.js				//use module using require()
+
+const myModule = require("./myModule.js");
+myModule.myFunction(); // Output: "Hello, world!"
+
+	
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++	
+test ('normalizeURL', () => {
+	const input = 'https://blog.boot.dev/path/' --->normalizeURL() will strip it down to blog.boot.dev/path
+													--hostname--  --pathname
+	const actual = normalizeURL(input)
+	const expected = 'blog.boot.dev/path'
+	expect(actual).toEqual(expected)			//test function checking if it is equal to   'blog.boot.dev/path'
+}) 
+
+
+
+b) Add additional check to test case --> Check for '/' also at the end and strip it
+		//How? slice()
+
+crawl.test.js
+
+function normalizeURL(urlString) {						//take input: urlString  https://blog.boot.dev/path/ 
+
+	const urlObj = new URL(urlString)						//constructor will lower case it for us //new URL() knows URL need to be case insensitive
+	
+	let hostPath = '${urlObj.hostname}${urlObj.pathname}'				//Template literals in JS: ${}	//thing inside= JS, thing outside= string
+
+
+	if (hostPath.length > 0 && hostPath.slice(-1) === '/')	{			//check if hostPath is non empty string
+													//check if last character is '/' --> //.slice() in JS just returns last character of string	
+		return hostPath.slice(0,-1)							//.slice(-1) = last character  // slice(start at beginning, end at second last char)
+	} else {
+		normalizeURL
+	}
+}
+
+module.exports = {					
+	normalizeURL
+}
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
+FINAL CODE:
+crawl.test.js
+______________________________________________
+const {normalizeURL} = require('./crawl.js')
+const { text, expect } = require('@jest/globals')
+
+
+'https://boot.dev'
+'http://boot.dev'
+'https://Boot.dev'
+
+
+
+test ('normalizeURL', () => {
+	const input = 'https://blog.boot.dev/path' --->normalizeURL() will strip it down to blog.boot.dev/path
+													--hostname--  --pathname
+	const actual = normalizeURL(input)
+	const expected = 'blog.boot.dev/path'
+	expect(actual).toEqual(expected)			//test function checking if it is equal to   'blog.boot.dev/path'
+}) 
+
+test('normalizeURL strip trailing slash', () =>‘{
+
+	const input = 'https://blog.boot.dev/path/'
+	const actual = normalizeURL(input)
+	const expected = 'blog.boot.dev/path'
+	expect(actual).toEqual(expected)
+
+})
+
+
+
+test('normalizeURL capitals', () =>‘{
+
+	const input = 'https://BLOG.boot.dev/path/'		//how will we change it lowercase? no special logic needed  //new URL(urlString) constructor will lower case for us
+	const actual = normalizeURL(input)
+	const expected = 'blog.boot.dev/path'
+	expect(actual).toEqual(expected)
+
+})
+
+
+>OUTPUT:
+Test: passed
+
+
+
+
+
++++++++++++++++++++++++++++++++
+Concept: Important JSDoM methods
+a) Create JSDOM instance from HTML
+const { JSDOM } = require('jsdom');
+const fs = require('fs');
+
+const html = fs.readFileSync('index.html', 'utf8');
+const dom = new JSDOM(html);
+
+b) Create JSDOM instance from URL
+const { JSDOM } = require('jsdom');
+
+const url = 'https://www.example.com';
+const dom = await JSDOM.fromURL(url);
+
+
+
+c) Return serialized HTML of instance
+const { JSDOM } = require('jsdom');
+
+const url = 'https://www.example.com';
+const dom = await JSDOM.fromURL(url);
+
+
+d) Browser APIs (window object)
+const { JSDOM } = require('jsdom');
+
+const html = '<!DOCTYPE html><html><head><title>Example</title></head><body><h1>Hello, world!</h1></body></html>';
+const dom = new JSDOM(html);
+const h1Element = dom.window.document.querySelector('h1');
+console.log(h1Element.textContent); // Outputs: "Hello, world!"
+
+
+	DOM APIs
+	
+	d.1) Access document object: window.document
+		const { JSDOM } = require('jsdom');
+		
+		const html = '<!DOCTYPE html><html><head><title>Example</title></head><body><h1>Hello, world!</h1></body></html>';
+		const dom = new JSDOM(html);
+		const document = dom.window.document;
+
+	d.2) Return 1st element that matches CSS selector
+
+		const { JSDOM } = require('jsdom');
+
+		const html = '<!DOCTYPE html><html><head><title>Example</title></head><body><h1>Hello, world!</h1></body></html>';
+		const dom = new JSDOM(html);
+		const h1Element = dom.window.document.querySelector('h1');
+		console.log(h1Element.textContent); // Outputs: "Hello, world!"
+
+	d.3) Return all elements matching query selector: document.querySelectorAll('h1, p')
+
+		const { JSDOM } = require('jsdom');
+	
+		const html = '<!DOCTYPE html><html><head><title>Example</title></head><body><h1>Hello, world!</h1><p>Lorem ipsum dolor sit amet</p></body></html>';
+		const dom = new JSDOM(html);
+		const elements = dom.window.document.querySelectorAll('h1, p');
+		elements.forEach(element => console.log(element.textContent));
+		// Outputs: "Hello, world!", "Lorem ipsum dolor sit amet"
+
+
+	d.4) Create a new html element
+
+		const { JSDOM } = require('jsdom');
+
+		const dom = new JSDOM();
+		const divElement = dom.window.document.createElement('div');
+		divElement.textContent = 'Hello, world!';		
+		dom.window.document.body.appendChild(divElement);
+		console.log(dom.serialize());
+		// Outputs: "<!DOCTYPE html><html><head></head><body><div>Hello, world!</div></body></html>"
+
+	d.5) Display dialog box with specified message
+
+		const { JSDOM } = require('jsdom');
+	
+		const dom = new JSDOM();
+		dom.window.alert('Hello, world!');
+
+	
+
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+i) 
+git add .					//add changes made to staging area	//adds only to tracked files
+						//if new file created (not tracked) git add filename
+git commit -m "normalizeURL and tests"	//save the changes
+
+
+j)
+npm install jsdom		//no --dev //install as a normal dependency, not dev dependency
+				//--dev : used by developers  //normal dependency : used by application when it is running in production
+				//Why jsdom? interact with DOM in Node.js environment
+
+
+a)
+//Old test case 
+test ('normalizeURL', () => {
+	const input = 'https://blog.boot.dev/path/' --->normalizeURL() will strip it down to blog.boot.dev/path
+													--hostname--  --pathname
+	const actual = normalizeURL(input)
+	const expected = 'blog.boot.dev/path'
+	expect(actual).toEqual(expected)			//test function checking if it is equal to   'blog.boot.dev/path'
+}) 
+
+
+
+b) New test case
+Objective:  b.1) extract URL from HTML		//getURLsFromHTML(htmlBody, baseURL)
+		create JSDOM object.pass htmlBody as string to constructor
+		find list of all <a> tags: dom.window.document.querySelectorAll('a')
+		loop over the elements list
+			console.log(list.href)		//from <a/> tags log only href
+			url.push(list.href)		//push all the hrefs into url array
+			return urls array
+
+
+
+	     b.2) return Normalized URL 		//normalizeURL(urlString)
+			return with last character
+
+
+crawl.test.js
+
+b.1) Add strip trailing '/' test case
+b.2) Add getURLsFromHTML()	//takes input htmlBody and baseURL
+					//htmlBody = string representation of html
+					//baseURL  = URL 
+				//Output of this function: array of strings : represents URL
+
+b.3) Use JSDOM		////what it does? gives way to access DOM APIs			
+				//basically create a DOM object by calling JS DOM		//pass HTML as input	////takes input : html as a string//takes input : html as a string --> Creates a Document object model
+						//basically inside memory how html tree is represented = DOM	//we use DOM to get url
+				//Using JSDOM we write a script in node ---> interacts with DOM --> crawls webpages
+
+b.4) Also pull out relative URLs, not just absolute URLs	//write a new test for this
+	relative URL => does not include protocol and domain  --> <a href="/path/">
+										
+
+	abosolute URL =>						 --> 	<a href="https://blog.boot.dev/path/">
+										
+
+	Above is how browser looks for relative and absolute urls
+	If a url is relative (i.e starts with /) ---> that url is assumed to be attached to same domain
+	
+	We are taking care that we are extracting it as a full absolute url , not just "/path"
+
+	So 	
+	if you click:  <a href="/path/">
+
+
+i.e
+	if relative URL is in HTML, and 
+	and we have a baseURL defined --> pull it out as a full URL
+	
+	
+	write logic for it inside for loop inside getURLsFromHTML() 
+
+
+-------------------------------------------------------------------------------------------------------------
+const {JSDOM} = require('jsdom')		//import jsdom //what it does? gives way to access DOM APIs
+
+function getURLsFromHTML(htmlBody, baseURL) {
+	const urls = []
+	const dom = new JSDOM(htmlBody)	//takes input : html as a string --> Creates a Document object model
+	const linkElements = dom.window.document.querySelectorAll('a')		//gives list of all <a> tags in html
+	for(const linkElement of linkElements) {
+		console.log(linkElement.href)				//https://blog.boot.dev
+		urls.push(linkElement.href)				//append to urls list
+	}
+	return urls
+}
+
+
+function normalizeURL(urlString) {
+	const urlObj = new URL(urlString)						//constructor will lower case it for us //new URL() knows URL need to be case insensitive
+	return '${urlObj.hostname}${urlObj.pathname}'			//Template literals in JS: ${}	//thing inside= JS, thing outside= string
+
+
+	if (hostPath.length > 0 && hostPath.slice(-1) === '/')	{			//.slice() in JS just returns last character of string	
+		return hostPath.slice(0,-1)
+	} else {
+		normalizeURL
+	}
+}
+
+
+
+module.exports = {
+	normalizeURL
+	getURLsFromHTML
+}
+
+crawl.test.js
+______________________________________________
+const {normalizeURL} = require('./crawl.js')
+const { text, expect } = require('@jest/globals')
+
+
+'https://boot.dev'
+'http://boot.dev'
+'https://Boot.dev'
+
+
+
+test ('normalizeURL', () => {
+	const input = 'https://blog.boot.dev/path' --->normalizeURL() will strip it down to blog.boot.dev/path
+													--hostname--  --pathname
+	const actual = normalizeURL(input)
+	const expected = 'blog.boot.dev/path'
+	expect(actual).toEqual(expected)			//test function checking if it is equal to   'blog.boot.dev/path'
+}) 
+
+test('normalizeURL strip trailing slash', () =>‘{
+
+	const input = 'https://blog.boot.dev/path/'
+	const actual = normalizeURL(input)
+	const expected = 'blog.boot.dev/path'
+	expect(actual).toEqual(expected)
+
+})
+
+test('normalizeURL capitals', () =>‘{
+
+	const input = 'https://BLOG.boot.dev/path/'		//how will we change it lowercase? no special logic needed  //new URL(urlString) constructor will lower case for us
+	const actual = normalizeURL(input)
+	const expected = 'blog.boot.dev/path'
+	expect(actual).toEqual(expected)
+
+})
+
+
+
+test('getURLsFromHTML', () =>{
+
+	const inputHTMLBody = '
+<html>
+	<body>
+			<a href="https://blog.boot.dev">
+			Boot.dev Blog
+		</a>
+	</body>
+</html>
+
+	const InputBaseURL = "https://blog.boot.dev"
+	const actual = getURLFromHTML(input)
+	const expected = ["https://blog.boot.dev/"]		//this will fail since rn we get empty array returned
+	expect(actual).toEqual(expected)
+
+})
+
+
+
+test('getURLsFromHTML relative', () =>{
+
+	const inputHTMLBody = '
+<html>
+	<body>
+			<a href="/path/">
+			Boot.dev Blog
+		</a>
+	</body>
+</html>
+
+	const InputBaseURL = "https://blog.boot.dev"
+	const actual = getURLFromHTML(input)
+	const expected = ["https://blog.boot.dev/"]		//this will fail since rn we get empty array returned
+	expect(actual).toEqual(expected)
+
+})
+
+test('getURLsFromHTML absolute', () =>{
+
+	const inputHTMLBody = '
+<html>
+	<body>
+			<a href="https://blog.boot.dev/path/">
+			Boot.dev Blog
+		</a>
+	</body>
+</html>
+
+	const InputBaseURL = "https://blog.boot.dev/path/"
+	const actual = getURLFromHTML(input)
+	const expected = ["https://blog.boot.dev/"]		//this will fail since rn we get empty array returned
+	expect(actual).toEqual(expected)
+
+})
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+FINAL CODE:
+Crawl.js
+
+const {JSDOM} = require('jsdom')
+
+function getURLsFromHTML(htmlBody, baseURL) {
+	const urls = []
+	const dom = new JSDOM(htmlBody)
+	const linkElements = dom.window.document.querySelectorAll('a')
+	for(const linkElement of linkElements) {
+		console.log(linkElement.href)
+		urls.push(linkElement.href)
+	}
+	return urls
+}
+
+function normalizeURL(urlString) {
+	const urlObj = new URL(urlString)
+	const hostPath = '${urlObj.hostname}${urlObj.pathname}'
+	if (hostPath.length > 0 && hostPath.slice(-1) === '/') {
+		return hostPath.slice(0,-1)
+	} else {
+		return hostPath
+	}
+}
+
+module.exports = {
+	normalizeURL,
+	getURLsFromHTML
+}
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Crawl.test.js
+
+const {normalizeURL, getURLsFromHTML} = require('./crawl.js')
+const { text, expect } = require('@jest/globals')
+
+test('normalizeURL', () => {
+	const input = 'https://blog.boot.dev/path'
+	const actual = normalizeURL(input)
+	const expected = 'blog.boot.dev/path'
+	expect(actual).toEqual(expected)
+})
+
+test('normalizeURL strip trailing slash', () => {
+	const input = 'https://blog.boot.dev/path/'
+	const actual = normalizeURL(input)
+	const expected = 'blog.boot.dev/path'
+	expect(actual).toEqual(expected)
+})
+
+test('normalizeURL capitals', () => {
+	const input = 'https://BLOG.boot.dev/path/'
+	const actual = normalizeURL(input)
+	const expected = 'blog.boot.dev/path'
+	expect(actual).toEqual(expected)
+})
+
+test('getURLsFromHTML', () => {
+	const inputHTMLBody = `
+<html>
+	<body>
+			<a href="https://blog.boot.dev">
+			Boot.dev Blog
+		</a>
+	</body>
+</html>`
+	const inputBaseURL = "https://blog.boot.dev"
+	const actual = getURLsFromHTML(inputHTMLBody, inputBaseURL)
+	const expected = ["https://blog.boot.dev/"]
+	expect(actual).toEqual(expected)
+})
+
+test('getURLsFromHTML relative', () => {
+	const inputHTMLBody = `
+<html>
+	<body>
+			<a href="/path/">
+			Boot.dev Blog
+		</a>
+	</body>
+</html>`
+	const inputBaseURL = "https://blog.boot.dev"
+	const actual = getURLsFromHTML(inputHTMLBody, inputBaseURL)
+	const expected = ["https://blog.boot.dev/path/"]
+	expect(actual).toEqual(expected)
+})
+
+test('getURLsFromHTML absolute', () => {
+	const inputHTMLBody = `
+<html>
+	<body>
+			<a href="https://blog.boot.dev/path/">
+			Boot.dev Blog
+		</a>
+	</body>
+</html>`
+	const inputBaseURL = "https://blog.boot.dev/path/"
+	const actual = getURLsFromHTML(inputHTMLBody, inputBaseURL)
+	const expected = ["https://blog.boot.dev/path/"]
+	expect(actual).toEqual(expected)
+})
+
+

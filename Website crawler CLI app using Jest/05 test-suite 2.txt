@@ -1,0 +1,93 @@
+Objective: Add test for training '/' , capital
+----------------------------------------------
+Some URLs end with '/ '
+Some dont
+
+a)
+//Old test case will fail
+test ('normalizeURL', () => {
+	const input = 'https://blog.boot.dev/path/' --->normalizeURL() will strip it down to blog.boot.dev/path
+													--hostname--  --pathname
+	const actual = normalizeURL(input)
+	const expected = 'blog.boot.dev/path'
+	expect(actual).toEqual(expected)			//test function checking if it is equal to   'blog.boot.dev/path'
+}) 
+
+
+
+b) New test case
+crawl.test.js
+
+b.1) Add strip '/' test case
+b.2) 
+
+function normalizeURL(urlString) {
+	const urlObj = new URL(urlString)						//constructor will lower case it for us //new URL() knows URL need to be case insensitive
+	return '${urlObj.hostname}${urlObj.pathname}'			//Template literals in JS: ${}	//thing inside= JS, thing outside= string
+
+
+	if (hostPath.length > 0 && hostPath.slice(-1) === '/')	{			//.slice() in JS just returns last character of string	
+		return hostPath.slice(0,-1)
+	} else {
+		normalizeURL
+	}
+}
+
+
+
+mpdule.exports = {
+	normalizeURL
+}
+
+crawl.test.js
+______________________________________________
+const {normalizeURL} = require('./crawl.js')
+const { text, expect } = require('@jest/globals')
+
+
+'https://boot.dev'
+'http://boot.dev'
+'https://Boot.dev'
+
+
+
+test ('normalizeURL', () => {
+	const input = 'https://blog.boot.dev/path' --->normalizeURL() will strip it down to blog.boot.dev/path
+													--hostname--  --pathname
+	const actual = normalizeURL(input)
+	const expected = 'blog.boot.dev/path'
+	expect(actual).toEqual(expected)			//test function checking if it is equal to   'blog.boot.dev/path'
+}) 
+
+test('normalizeURL strip trailing slash', () =>‘{
+
+	const input = 'https://blog.boot.dev/path/'
+	const actual = normalizeURL(input)
+	const expected = 'blog.boot.dev/path'
+	expect(actual).toEqual(expected)
+
+})
+
+
+
+test('normalizeURL capitals', () =>‘{
+
+	const input = 'https://BLOG.boot.dev/path/'		//how will we change it lowercase? no special logic needed  //new URL(urlString) constructor will lower case for us
+	const actual = normalizeURL(input)
+	const expected = 'blog.boot.dev/path'
+	expect(actual).toEqual(expected)
+
+})
+
+
+>OUTPUT:
+Test: passed
+
+
+
+
+
++++++++++++++++++++++++++++++++
+
+git add .
+git commit -m "normalizeURL and tests"

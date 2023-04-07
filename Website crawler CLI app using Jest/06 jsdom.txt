@@ -1,0 +1,198 @@
+npm install jsdom		//no --dev //install as a normal dependency, not dev dependency
+				//--dev : used by developers  //normal dependency : used by application when it is running in production
+
+The getURLsFromHTML() function now takes two parameters: htmlBody and baseURL. The htmlBody parameter contains the HTML content to be parsed for URLs, while the baseURL parameter represents the base URL from which relative URLs in the htmlBody should be resolved.
+
+The function first creates a new JSDOM object with the htmlBody and baseURL parameters. It then selects all anchor (<a>) elements in the DOM and extracts their href attributes. If the href attribute is a valid URL and is not equal to '#' or 'javascript:void(0);', the function checks whether it is a relative URL (i.e., it starts with '/'). If it is a relative URL, it resolves it against the baseURL using the URL constructor and the pathname property, and converts it to a string. The function then adds the URL to the urls array and continues to the next anchor element. When all anchor elements have been processed, the function returns the urls array.
+
+The normalizeURL() function takes a URL string as input and returns the normalized version of the URL. The function first creates a new URL object with the input string in lowercase. It then combines the hostname and pathname properties of the URL object into a single string, which represents the host path of the URL. If the host path ends with a '/', the function removes the trailing slash. Finally, the function returns the normalized host path.
+
+The test cases for the two functions are also provided. The normalizeURL tests include a test case for stripping trailing slashes and a test case for handling URLs with uppercase letters. The getURLsFromHTML tests include a test case for handling absolute URLs and a test case for handling relative URLs.
+
+
+
+
+
+a)
+//Old test case will fail
+test ('normalizeURL', () => {
+	const input = 'https://blog.boot.dev/path/' --->normalizeURL() will strip it down to blog.boot.dev/path
+													--hostname--  --pathname
+	const actual = normalizeURL(input)
+	const expected = 'blog.boot.dev/path'
+	expect(actual).toEqual(expected)			//test function checking if it is equal to   'blog.boot.dev/path'
+}) 
+
+
+
+b) New test case
+crawl.test.js
+
+b.1) Add strip trailing '/' test case
+b.2) Add getURLsFromHTML()	//takes input htmlBody and baseURL
+					//htmlBody = string representation of html
+					//baseURL  = URL 
+				//Output of this function: array of strings : represents URL
+
+b.3) Use JSDOM		////what it does? gives way to access DOM APIs			
+				//basically create a DOM object by calling JS DOM		//pass HTML as input	////takes input : html as a string//takes input : html as a string --> Creates a Document object model
+						//basically inside memory how html tree is represented = DOM	//we use DOM to get url
+				//Using JSDOM we write a script in node ---> interacts with DOM --> crawls webpages
+
+b.4) Also pull out relative URLs, not just absolute URLs	//write a new test for this
+	relative URL => does not include protocol and domain  --> <a href="/path/">
+										
+
+	abosolute URL =>						 --> 	<a href="https://blog.boot.dev/path/">
+										
+
+	Above is how browser looks for relative and absolute urls
+	If a url is relative (i.e starts with /) ---> that url is assumed to be attached to same domain
+	
+	We are taking care that we are extracting it as a full absolute url , not just "/path"
+
+	So 	
+	if you click:  <a href="/path/">
+
+
+i.e
+	if relative URL is in HTML, and 
+	and we have a baseURL defined --> pull it out as a full URL
+	
+	
+	write logic for it inside for loop inside getURLsFromHTML() 
+
+
+----------------------------------------------------------------------------------------------
+const {JSDOM} = require('jsdom')		//import jsdom //what it does? gives way to access DOM APIs
+
+function getURLsFromHTML(htmlBody, baseURL) {
+	const urls = []
+	const dom = new JSDOM(htmlBody)	//takes input : html as a string --> Creates a Document object model
+	const linkElements = dom.window.document.querySelectorAll('a')		//gives list of all <a> tags in html
+	for(const linkElement of linkElements) {
+		console.log(linkElement.href)			//https://blog.boot.dev
+		urls.push(linkElement.href)				//append to urls list
+	}
+	return urls
+}
+
+
+function normalizeURL(urlString) {
+	const urlObj = new URL(urlString)						//constructor will lower case it for us //new URL() knows URL need to be case insensitive
+	return '${urlObj.hostname}${urlObj.pathname}'			//Template literals in JS: ${}	//thing inside= JS, thing outside= string
+
+
+	if (hostPath.length > 0 && hostPath.slice(-1) === '/')	{			//.slice() in JS just returns last character of string	
+		return hostPath.slice(0,-1)
+	} else {
+		normalizeURL
+	}
+}
+
+
+
+module.exports = {
+	normalizeURL
+	getURLsFromHTML
+}
+
+crawl.test.js
+______________________________________________
+const {normalizeURL} = require('./crawl.js')
+const { text, expect } = require('@jest/globals')
+
+
+'https://boot.dev'
+'http://boot.dev'
+'https://Boot.dev'
+
+
+
+test ('normalizeURL', () => {
+	const input = 'https://blog.boot.dev/path' --->normalizeURL() will strip it down to blog.boot.dev/path
+													--hostname--  --pathname
+	const actual = normalizeURL(input)
+	const expected = 'blog.boot.dev/path'
+	expect(actual).toEqual(expected)			//test function checking if it is equal to   'blog.boot.dev/path'
+}) 
+
+test('normalizeURL strip trailing slash', () =>‘{
+
+	const input = 'https://blog.boot.dev/path/'
+	const actual = normalizeURL(input)
+	const expected = 'blog.boot.dev/path'
+	expect(actual).toEqual(expected)
+
+})
+
+test('normalizeURL capitals', () =>‘{
+
+	const input = 'https://BLOG.boot.dev/path/'		//how will we change it lowercase? no special logic needed  //new URL(urlString) constructor will lower case for us
+	const actual = normalizeURL(input)
+	const expected = 'blog.boot.dev/path'
+	expect(actual).toEqual(expected)
+
+})
+
+
+
+test('getURLsFromHTML', () =>{
+
+	const inputHTMLBody = '
+<html>
+	<body>
+			<a href="https://blog.boot.dev">
+			Boot.dev Blog
+		</a>
+	</body>
+</html>
+
+	const InputBaseURL = "https://blog.boot.dev"
+	const actual = getURLFromHTML(input)
+	const expected = ["https://blog.boot.dev/"]		//this will fail since rn we get empty array returned
+	expect(actual).toEqual(expected)
+
+})
+
+
+
+test('getURLsFromHTML relative', () =>{
+
+	const inputHTMLBody = '
+<html>
+	<body>
+			<a href="/path/">
+			Boot.dev Blog
+		</a>
+	</body>
+</html>
+
+	const InputBaseURL = "https://blog.boot.dev"
+	const actual = getURLFromHTML(input)
+	const expected = ["https://blog.boot.dev/"]		//this will fail since rn we get empty array returned
+	expect(actual).toEqual(expected)
+
+})
+
+test('getURLsFromHTML absolute', () =>{
+
+	const inputHTMLBody = '
+<html>
+	<body>
+			<a href="https://blog.boot.dev/path/">
+			Boot.dev Blog
+		</a>
+	</body>
+</html>
+
+	const InputBaseURL = "https://blog.boot.dev/path/"
+	const actual = getURLFromHTML(input)
+	const expected = ["https://blog.boot.dev/"]		//this will fail since rn we get empty array returned
+	expect(actual).toEqual(expected)
+
+})
+
+
+
+

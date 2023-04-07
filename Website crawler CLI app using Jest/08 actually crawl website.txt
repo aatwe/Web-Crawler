@@ -1,0 +1,707 @@
+Header:
+1)
+a) write function crawlPage()		//takes input what we got from command line
+  a.1)  log 'actively crawling'
+  a.2) use fetch api
+	//make crawPage async
+	log out the response body
+
+b) getURLsFromHTML()
+2) 
+Hook up to main.js
+
+
+
+
+Code:
+-------------------------------------------------------------------------------------------------------------------------------------------------
+Crawl.js
+
+const {JSDOM} = require('jsdom')		//import jsdom //what it does? gives way to access DOM APIs
+
+async function crawlPage(currrentURL) {
+	console.log('actively crawling')	
+
+try{
+	const resp = await fetch(currentURL)	//what returns? promise
+	console.log(await resp.text())			//note how earlier we wanted response format json, now we want response body as HTML
+								//dont forget to await since resp.text() returns a promise
+
+	if(resp.status > 399) {
+		console.log('error in fetch with status code: ${resp.status} on page: ${currentURL}')
+	}
+	} catch(err) {
+		console.log('error in fetch: ${err.message}, on page : ${currentURL}')
+		return
+	}
+
+	const contentType  = resp.headers.get(":content-type")	//make sure it is really html
+	if(!contentType.includes( "text/html") {
+		console.log('non html response, content type: ${contentType} on page: ${currentURL}')
+		return
+	}
+	console.log(await  resp.text())
+
+
+} catch(err) {
+	console.log(‘error in fetch: ${err.message}, on page: ${currentURL}‘)
+}
+	
+
+
+function getURLsFromHTML(htmlBody, baseURL) {
+	const urls = []
+	const dom = new JSDOM(htmlBody)	//takes input : html as a string --> Creates a Document object model
+	const linkElements = dom.window.document.querySelectorAll('a')		//gives list of all <a> tags in html
+	for(const linkElement of linkElements) {
+		if(linkElement.href.slice(0,1) === '/') {
+			//relative
+
+		try {
+			const urlObj = new URL ('$}{baseURL}${linkElement.href}')
+			urls.push('urlObj.href')
+		     } catch (err) {
+			console.log('error with relative url: ${err.message}')
+		} 
+		}
+		else {
+			//absolute
+			try {
+				const urlObj = new URL (linkElement.href)
+				urls.push(urlObj.href)
+		     } catch (err) {
+				console.log('error with relative url: ${err.message}')
+			}
+	}
+	return urls
+}
+
+
+function normalizeURL(urlString) {
+	const urlObj = new URL(urlString)						//constructor will lower case it for us //new URL() knows URL need to be case insensitive
+	return '${urlObj.hostname}${urlObj.pathname}'			//Template literals in JS: ${}	//thing inside= JS, thing outside= string
+
+
+	if (hostPath.length > 0 && hostPath.slice(-1) === '/')	{			//.slice() in JS just returns last character of string	
+		return hostPath.slice(0,-1)
+	} else {
+		normalizeURL
+	}
+}
+
+
+
+module.exports = {
+	normalizeURL
+	getURLsFromHTML,
+	crawlPage
+}
+
+--------------------------------------------------------------------
+
+crawl.test.js
+______________________________________________
+const {normalizeURL} = require('./crawl.js')
+const { text, expect } = require('@jest/globals')
+
+
+'https://boot.dev'
+'http://boot.dev'
+'https://Boot.dev'
+
+
+
+test ('normalizeURL', () => {
+	const input = 'https://blog.boot.dev/path' --->normalizeURL() will strip it down to blog.boot.dev/path
+													--hostname--  --pathname
+	const actual = normalizeURL(input)
+	const expected = 'blog.boot.dev/path'
+	expect(actual).toEqual(expected)			//test function checking if it is equal to   'blog.boot.dev/path'
+}) 
+
+test('normalizeURL strip trailing slash', () =>‘{
+
+	const input = 'https://blog.boot.dev/path/'
+	const actual = normalizeURL(input)
+	const expected = 'blog.boot.dev/path'
+	expect(actual).toEqual(expected)
+
+})
+
+test('normalizeURL capitals', () =>‘{
+
+	const input = 'https://BLOG.boot.dev/path/'		//how will we change it lowercase? no special logic needed  //new URL(urlString) constructor will lower case for us
+	const actual = normalizeURL(input)
+	const expected = 'blog.boot.dev/path'
+	expect(actual).toEqual(expected)
+
+})
+
+test('getURLsFromHTML', () =>{
+
+	const inputHTMLBody = '
+<html>
+	<body>
+			<a href="https://blog.boot.dev">
+			Boot.dev Blog
+		</a>
+	</body>
+</html>
+
+	const InputBaseURL = "https://blog.boot.dev"
+	const actual = getURLFromHTML(input)
+	const expected = ["https://blog.boot.dev/"]		//this will fail since rn we get empty array returned
+	expect(actual).toEqual(expected)
+
+})
+
+
+
+test('getURLsFromHTML relative', () =>{
+
+	const inputHTMLBody = '
+<html>
+	<body>
+			<a href="/path/">
+			Boot.dev Blog
+		</a>
+	</body>
+</html>
+
+	const InputBaseURL = "https://blog.boot.dev"
+	const actual = getURLFromHTML(input)
+	const expected = ["https://blog.boot.dev/"]		//this will fail since rn we get empty array returned
+	expect(actual).toEqual(expected)
+
+})
+
+test('getURLsFromHTML absolute', () =>{
+
+	const inputHTMLBody = '
+<html>
+	<body>
+			<a href="https://blog.boot.dev/path/">
+			Boot.dev Blog
+		</a>
+	</body>
+</html>
+
+	const InputBaseURL = "https://blog.boot.dev/path/"
+	const actual = getURLFromHTML(input)
+	const expected = ["https://blog.boot.dev/"]		//this will fail since rn we get empty array returned
+	expect(actual).toEqual(expected)
+
+})
+
+
+
+test('getURLsFromHTML both', () =>{
+
+	const inputHTMLBody = '
+<html>
+	<body>
+			<a href="https://blog.boot.dev/path/">
+				Boot.dev Blog Path One
+			</a>
+			<a href="/path2/">
+				Boot.dev Blog Path Two
+			</a>
+	</body>
+</html>
+
+	const InputBaseURL = "https://blog.boot.dev/path/"
+	const actual = getURLFromHTML(input)
+	const expected = ["https://blog.boot.dev/"]		//this will fail since rn we get empty array returned
+	expect(actual).toEqual(expected)
+
+})
+
+
+test('getURLsFromHTML relative', () =>{
+
+	const inputHTMLBody = '
+<html>
+	<body>
+			<a href="https://blog.boot.dev/path/">
+				Invalid URL
+			</a>
+		
+	</body>
+</html>
+
+	const InputBaseURL = "https://blog.boot.dev/path/"
+	const actual = getURLFromHTML(input)
+	const expected = ["https://blog.boot.dev/"]		//this will fail since rn we get empty array returned
+	expect(actual).toEqual(expected)
+
+})	
+-------------------------------------------------------------------------------------------------------------------------------------------------
+The script crawl.js is responsible for crawling the website starting from a provided URL. The script follows links on a page, and recursively crawls each page it encounters. The crawlPage() function is called recursively and takes three inputs: the base URL, the current URL being crawled, and an object called pages that keeps track of all pages that have been crawled so far.
+
+The main.js script uses crawlPage() to crawl a website starting from a given URL. It first checks if a website has been provided and if there are no extra arguments. It then calls crawlPage() with the given URL and prints out the base URL.
+
+
+
+a) import crawlPage in main.js
+//crawlPage()
+
+
+b) npm run start https://wagslane.dev
+
+main.js
+
+c) FInal output:
+	we are getting some HTML		//this all html on wagslane.dev
+
+
+d) test bad input:
+	npm start  http://garbageurl		//code panics and dumps out trace	//add try{} catch{} in crawlPage() -> display proper error message
+						
+	Test again after
+
+	(666;:E33155?"éibériméritéiwéfhifiéE‘nie Fetch API is an experimental feature. This feature could change at any tim II
+	8 U
+	(Use ‘node —trace-warnings to show where the warning was created) I ' ' " ' —
+	error in fetch: fetch failed on page: http://garbageurl
+
+	//Why the warning?
+	fetch was avail on browser only, but we using JS using node on CLI	//node added support for fetch API	//else install node fetch
+	//we dont want this warning: in package.json -> pass no warning flag
+	"scripts": {
+	"start": "nodeI——no-warnings main.js",
+	"test": "jest"
+	}
+
+
+
+e) make sure status of fetch request is : 200 level code, 300 also ok	//dont want 400,500
+	write in crawl.js
+
+f) npm start http://wagslane.dev		//valid url
+	
+<>
+
+HTML	//we are getting the html		//invalid url
+
+<>
+
+npm start http://wagslane.dev/garbagepath	//status code 404
+error in fetch With status code: 404 on page: http://wagslane.dev/garbagepath
+
+
+
+g) 	const contentType  = resp.headers.get(":content-type")	//make sure it is really htmlin crawlPage()
+
+if(contentType.includes( "text/html") {
+		console.log('non html response, content type: ${contentType} on page: ${currentURL}')
+		return
+	}
+	console.log(await  resp.text())
+
+
+>npm start http://wagslane/dev/sitemap.xml
+starting crawl of http://wagslane.dev/sitemap.xml
+
+actively crawling: http://wagslane.dev/sitemap.xml II ii" ‘
+non html response, content type: application/xml, on page: http://wagslane.dev/sitemap.x II I
+wagslane©iacBook~Pro—4 webcrawlerhttp 9:; i i
+wagslanewacBook-Pro-4 webcrawlerhttp 9s
+
+
+
+git add .
+git commit -m "crawl single page with error handling"
+
+
+
+
+	
+------------------------------------
+
+main.js
+
+const {crawlPage} = require('./crawl.js')
+function main() {
+	if(process.argv.length < 3) {			//why3?
+		console.log("no website provided")
+		process.exit(1)				//dont forget to exit process 
+	}
+
+	if(process.argv.length > 3) {			//why3?		//explained in header
+		console.log("too many command line arguments")
+		process.exit(1)				//dont forget to exit process 
+	}
+
+	const baseURL = process.argv[2]
+
+	//for (const arg of process.argv) {
+	//	console.log(arg)
+	//}
+
+	console.log("starting crawl of ${baseURL}")
+	crawlPage(baseURL)
+}
+
+main() 
+
+
+>
+webcrawlerhttp npm run start https://wagslane.dev
+
+<>
+	//HTML
+<>
+
+npm start  http://garbageurl
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
+h) crawl entire website instead of single page
+		crawlPage()	takes 3 input  //earlier it took just url
+		base URL, current URL, pages Object
+		//currentURL = what page currently crawling
+		//pages: tracks all pages crawled so far
+	h.1)
+	//currentURL should be on same domain as base URL
+	//if external site link -> ignore	//how? new url() constructor
+
+	if baseURLObj 's hostname !=  currentURLObj's hostname? --> return pages
+			What are pages? how and where we track all pages crawled
+	if hostnames are different --> we will skip these pages
+
+
+	h.2) grab a normalized version of current URl
+			const normalizedCurrentURL = normalizeURL
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++====
+Crawl.js
+
+const {JSDOM} = require('jsdom')		//import jsdom //what it does? gives way to access DOM APIs
+
+async function crawlPage(baseURL, currentURL, pages) {
+	console.log('actively crawling: ${currentURL}')	
+
+
+	const baseURLObj = new URL(baseURL)
+	const currentURLObj = new URL(currentURL)
+	
+	if(baseURLObj.hostname != currentURLObj.hostname) {		//Seeing external link
+		return pages;
+	}
+
+											//Processing link we have seen before
+	const normalizedCurrentURL = normalizeURL(currentURL)		//if normalized current URL exists within pages object	////How to check if page is already crawled? if normalizedCurrentURL exists within the pages object
+	if(pages[normalizedCurrentURL] > 0) {					//if we have already seen this page -->increment count
+		pages[normalizedCurrentURL]++
+		return pages								//pages object = map of normalized URLs	
+  	}										//when we generate a report, we can tell how many times a certain page is linked to on the site
+
+
+	//We still dont have entry for normalizedCurrentURL  //create an entry 
+	pages[normalizedCurrentURL] = 1		//first time seeing /crawling url
+	
+	console.log('actively crawling: ${currentURL}')
+
+
+
+
+	try{			//fetch the page
+	const resp = await fetch(currentURL)	//what returns? promise
+	console.log(await resp.text())			//note how earlier we wanted response format json, now we want response body as HTML
+								//dont forget to await since resp.text() returns a promise
+
+	if(resp.status > 399) {
+		console.log('error in fetch with status code: ${resp.status} on page: ${currentURL}')
+	}
+	} catch(err) {
+		console.log('error in fetch: ${err.message}, on page : ${currentURL}')
+		return pages
+	}
+
+	const contentType  = resp.headers.get(":content-type")	//make sure it is really html
+	if(!contentType.includes( "text/html") {
+		console.log('non html response, content type: ${contentType} on page: ${currentURL}')
+		return pages
+	}
+	
+	const htmlBody = await resp.text() 	//instead of logging html,save in a variable		//console.log(await resp.text())
+
+	const nextURLs =  getURLsFromHTML(htmlBody, baseURL)	//get all the nextURLs
+
+	for(const nextURL of nextURLs) {	//iterate over nextURLs			//recursively crawl these nextURL pages
+												//i.e function that calls itself
+				//crawl root --> find all links in it --> crawl all in them -->  find ...
+				//crawl all until all base cases are ssatisfied
+				//What base cases?
+				//either we hit link -> external to site --> dont crawl
+				//hit links already crawled -->dont crawl those
+	
+		pages = await crawlPage(baseURL, nextURL, pages)		//we get new updated pages object
+		}
+} catch(err) {
+	console.log(‘error in fetch: ${err.message}, on page: ${currentURL}‘)
+}
+
+return pages			//once crawled every page --> return pages object
+	
+
+
+function getURLsFromHTML(htmlBody, baseURL) {
+	const urls = []
+	const dom = new JSDOM(htmlBody)	//takes input : html as a string --> Creates a Document object model
+	const linkElements = dom.window.document.querySelectorAll('a')		//gives list of all <a> tags in html
+	for(const linkElement of linkElements) {
+		if(linkElement.href.slice(0,1) === '/') {
+			//relative
+
+		try {
+			const urlObj = new URL ('$}{baseURL}${linkElement.href}')
+			urls.push('urlObj.href')
+		     } catch (err) {
+			console.log('error with relative url: ${err.message}')
+		} 
+		}
+		else {
+			//absolute
+			try {
+				const urlObj = new URL (linkElement.href)
+				urls.push(urlObj.href)
+		     } catch (err) {
+				console.log('error with relative url: ${err.message}')
+			}
+	}
+	return urls
+}
+
+
+function normalizeURL(urlString) {
+	const urlObj = new URL(urlString)						//constructor will lower case it for us //new URL() knows URL need to be case insensitive
+	return '${urlObj.hostname}${urlObj.pathname}'			//Template literals in JS: ${}	//thing inside= JS, thing outside= string
+
+
+	if (hostPath.length > 0 && hostPath.slice(-1) === '/')	{			//.slice() in JS just returns last character of string	
+		return hostPath.slice(0,-1)
+	} else {
+		normalizeURL
+	}
+}
+
+
+
+module.exports = {
+	normalizeURL
+	getURLsFromHTML,
+	crawlPage
+}
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+k)
+Update main.js
+
+
+
+main.js
+
+const {crawlPage} = require('./crawl.js')
+async function main() {
+	if(process.argv.length < 3) {			//why3?
+		console.log("no website provided")
+		process.exit(1)				//dont forget to exit process 
+	}
+
+	if(process.argv.length > 3) {			//why3?		//explained in header
+		console.log("too many command line arguments")
+		process.exit(1)				//dont forget to exit process 
+	}
+
+	const baseURL = process.argv[2]
+
+	//for (const arg of process.argv) {
+	//	console.log(arg)
+	//}
+
+	console.log("starting crawl of ${baseURL}")
+	const pages = await crawlPage(baseURL, baseURL, {})				//crawlPage(baseURL)
+	
+	for(const page of Object.entries(pages)) {			//to make pages iterable
+		console.log(page)
+	}
+}
+
+main() 
+
+
+>
+webcrawlerhttp npm run start https://wagslane.dev
+
+<>
+	//HTML
+<>
+
+npm start  http://garbageurl
+ > webcrawlerhttp@1.0.0 start
+
+> node —-no-warnings main.js
+
+starting crawl of http://wagslane.dev
+actively crawling: http://wagslane.dev
+actively crawling: http://wagslane.dev/tags/
+actively crawling: http://wagslane.dev/about/
+actively crawling: http://wagslane.dev/index.xml
+actively crawling: http://wagslane.devltags/business/
+actively crawling: http://wagslane.dev/posts/dark—patterns/
+actively crawling: http://wagslane.dev/posts/things—i—dont-want-to-do-to-grow-business/
+actively crawling: http://wagslane.dev/tags/clean-code/
+actively crawling: http://wagslane.dev/posts/func-y-json-api/
+actively crawling: http://wagslane.dev/posts/keep-your—data-raw-at-rest/
+actively crawling: http://wagslane.dev/posts/continuous-deployments-arent-continuous-disruptions/
+actively crawling: http://wagslane.dev/posts/optimize-for-simplicit-first/
+actively crawling: http://wagslane.dev/tags/devops/
+actively crawling: http://wagslane.dev/posts/no-one-does-devops/
+actively crawling: http://wagslane.dev/posts/leave-scrum-to-rugby
+actively crawling: https://wagslane.dev/posts/managers—that-cant-code/
+actively crawling: http://wagslane.dev/posts/kanban-vs—scrum/
+actively crawling: http://wagslane.dev/tags/education/ II I" ‘ -
+
+
+> Test cases : green
+'IEBBLJTGWO 5' .1 -
+
+QKEEEMEEEhGEEWt-t " GK)"
+
+L .- lane.dev/about', 60 ]
+
+'wagslane.dev/index.xml', 60 ]
+
+'wagslane?dev/tags/business', 1 ]					//list of pages,  + how many times they are linked to
+'wagslane.dev/posts/dark-patterns', 2 ]
+'wagslane.dev/posts/things-i-dont-want-to-do-to-grow-business', 2 ]
+'wagslane.dev/tags/clean-code', 1 ]
+'wagslane.dev/posts/func-y-json-api', 2 ]
+'wagslane.dev/posts/keep-your-data-raw-at-rest', 2 ]
+'wagslane.dev/posts/continuous-deployments-arent-continuous-disruptions',
+
+
+
+//git add .
+//git commit -m "crawl page recursive working"
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++=
+Updates: correct code (cross-check)
+crawl.js
+__________
+
+
+const fetch = require('node-fetch');
+const { JSDOM } = require('jsdom');
+
+async function crawlPage(currentURL) {
+  console.log('actively crawling', currentURL);
+
+  try {
+    const resp = await fetch(currentURL);
+    const contentType = resp.headers.get('content-type');
+
+    if (!contentType.includes('text/html')) {
+      console.log(`non html response, content type: ${contentType} on page: ${currentURL}`);
+      return;
+    }
+
+    if (resp.status > 399) {
+      console.log(`error in fetch with status code: ${resp.status} on page: ${currentURL}`);
+      return;
+    }
+
+    const htmlBody = await resp.text();
+    const urls = getURLsFromHTML(htmlBody, currentURL);
+
+    console.log('urls:', urls);
+    return urls;
+  } catch (err) {
+    console.log(`error in fetch: ${err.message}, on page: ${currentURL}`);
+  }
+}
+
+function getURLsFromHTML(htmlBody, baseURL) {
+  const urls = [];
+  const dom = new JSDOM(htmlBody);
+
+  const linkElements = dom.window.document.querySelectorAll('a');
+  for (const linkElement of linkElements) {
+    if (linkElement.href.slice(0, 1) === '/') {
+      // relative
+      try {
+        const urlObj = new URL(`${baseURL}${linkElement.href}`);
+        urls.push(urlObj.href);
+      } catch (err) {
+        console.log(`error with relative url: ${err.message}`);
+      }
+    } else {
+      // absolute
+      try {
+        const urlObj = new URL(linkElement.href);
+        urls.push(urlObj.href);
+      } catch (err) {
+        console.log(`error with absolute url: ${err.message}`);
+      }
+    }
+  }
+  return urls;
+}
+
+function normalizeURL(urlString) {
+  const urlObj = new URL(urlString);
+  const normalizedURL = `${urlObj.hostname}${urlObj.pathname}`;
+  return normalizedURL.endsWith('/') ? normalizedURL.slice(0, -1) : normalizedURL;
+}
+
+module.exports = {
+  normalizeURL,
+  getURLsFromHTML,
+  crawlPage,
+};
+
+
+
+crawl.test.js
+______________
+const { normalizeURL, getURLsFromHTML } = require('./crawl.js');
+
+test('normalizeURL', () => {
+  const input = 'https://blog.boot.dev/path';
+  const actual = normalizeURL(input);
+  const expected = 'blog.boot.dev/path';
+  expect(actual).toEqual(expected);
+});
+
+test('normalizeURL strip trailing slash', () => {
+  const input = 'https://blog.boot.dev/path/';
+  const actual = normalizeURL(input);
+  const expected = 'blog.boot.dev/path';
+  expect(actual).toEqual(expected);
+});
+
+test('normalizeURL capitals', () => {
+  const input = 'https://BLOG.boot.dev/path/';
+  const actual = normalizeURL(input);
+  const expected = 'blog.boot.dev/path';
+  expect(actual).toEqual(expected);
+});
+
+test('getURLsFromHTML', () => {
+  const inputHTMLBody = `
+    <html>
+      <body>
+        <a href="https://blog.boot.dev">
+          Boot.dev Blog
+        </a>
+      </body>
+    </html>
+  `;
+  const inputBaseURL = 'https://blog.boot.dev';
+  const actual = getURLsFromHTML(inputHTMLBody, inputBaseURL);
+  const expected = ['https://blog.boot.dev/'];
+  expect(actual).toEqual(expected);
+});
+
+test('getURLsFromHTML relative', () =>

@@ -1,0 +1,80 @@
+Great progress so far! It seems like you have written some helper functions in the crawl.js file and also written tests for them. Additionally, you have set up the ability to take website input from the command line using the process object and have implemented some error handling for incorrect command line arguments.
+
+Now that you have the website input, the next step is to actually crawl the pages of the website. There are a few ways to approach this, but one common method is to use a web scraping library like cheerio or puppeteer to extract information from the HTML of the website.
+
+Overall, it looks like you're on the right track and making good progress towards your goal!
+
+
+
+a) What done till now?
+wrote helper functions in crawl.js file
+wrote tests for helper functions
+
+//Surprisingly actual program still prints only hello world
+
+b) What script should do? 
+	take input: website
+		where to take input from ? Command line
+			process object //global level	//grab cli arguments using argv
+				//process.argv
+	crawl that website
+
+>npm start wagslane.dev
+starting crawl
+
+c) why3? try printing out what arguments passed
+What we passed as argument? wagslane.dev
+
+what arguments printed in loop?
+	1st arg = name of interpreter	
+	2nd arg = name of program entry point
+	3rd arg = what we actually passing
+	
+
+d) Now we can take website input from command line
+How to Actually crawl pages?
+	
+//Concept:
+taking input from command line arguments
+	
+	process.argv
+	process obejct in Node.js
+	process.argv[] = {path node.js executable, path javascript file, command line arguments}
+			   = {'/usr/bin/node',  '/path/to/script.js','arg1'}
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Code:
+>main.js			//process.argv[] = array
+
+
+function main() {
+	if(process.argv.length < 3) {			//why3?
+		console.log("no website provided")
+		process.exit(1)				//dont forget to exit process 
+	}
+
+	if(process.argv.length > 3) {			//why3?		//explained in header
+		console.log("too many command line arguments")
+		process.exit(1)				//dont forget to exit process 
+	}
+
+	const baseURL = process.argv[2]		//3rd element retrieved
+
+	//for (const arg of process.argv) {
+	//	console.log(arg)
+	//}
+
+	console.log("starting crawl of ${baseURL}")
+
+}
+
+main() 
++++++++++++++++++++++++++++++++++
+
+>npm start
+no website provided
+
+
+>npm start wagslane.dev
+starting crawl of 
+

@@ -1,0 +1,1 @@
+Also Tracked already visited pages and control depth of recursion while checking for industry standard robots.txt file.
